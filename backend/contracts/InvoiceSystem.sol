@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 error InvoiceSystem__InvalidAmount();
 error InvoiceSystem__InvalidTokenAddress();
+error InvoiceSystem__InvalidClientAddress();
 error InvoiceSystem__InvoiceNotFound();
 error InvoiceSystem__InvoiceAlreadyPaid();
 error InvoiceSystem__PaymentTransferFailed();
@@ -29,6 +30,7 @@ contract InvoiceSystem is ReentrancyGuard {
     event InvoiceCreated(
         uint256 indexed id,
         address indexed seller,
+        address indexed client,
         uint256 amount,
         string description
     );
@@ -36,8 +38,9 @@ contract InvoiceSystem is ReentrancyGuard {
 
     // --- MAIN FUNCTIONS ---
     function createInvoice(
-        address _tokenAddress,
+        address _client,
         uint256 _amount,
+        address _tokenAddress,
         string memory _description
     ) external {
         if (_amount == 0) {
@@ -48,19 +51,29 @@ contract InvoiceSystem is ReentrancyGuard {
             revert InvoiceSystem__InvalidTokenAddress();
         }
 
+        if (_client == address(0)) {
+            revert InvoiceSystem__InvalidClientAddress();
+        }
+
         // Start from 1 for Id
         invoiceId++;
         invoices[invoiceId] = Invoice({
             id: invoiceId,
             seller: msg.sender,
-            client: address(0),
+            client: _client,
             tokenAddress: _tokenAddress,
             amount: _amount,
             description: _description,
             isPaid: false
         });
 
-        emit InvoiceCreated(invoiceId, msg.sender, _amount, _description);
+        emit InvoiceCreated(
+            invoiceId,
+            msg.sender,
+            _client,
+            _amount,
+            _description
+        );
     }
 
     function payInvoice(uint256 _invoiceId) external nonReentrant {
@@ -75,7 +88,7 @@ contract InvoiceSystem is ReentrancyGuard {
         }
 
         invoice.isPaid = true;
-        invoice.client = msg.sender;
+        // invoice.client = msg.sender; --> We approve for friend or other to pay Invoice
         // transferFrom include check balance of client
         bool success = IERC20(invoice.tokenAddress).transferFrom(
             msg.sender,
@@ -87,5 +100,14 @@ contract InvoiceSystem is ReentrancyGuard {
             revert InvoiceSystem__PaymentTransferFailed();
         }
         emit InvoicePaid(_invoiceId, msg.sender);
+    }
+
+    function getAllInvoices() public view returns (Invoice[] memory) {
+        Invoice[] memory allInvoices = new Invoice[](invoiceId);
+
+        for (uint256 i = 0; i < invoiceId; i++) {
+            allInvoices[i] = invoices[i + 1];
+        }
+        return allInvoices;
     }
 }
