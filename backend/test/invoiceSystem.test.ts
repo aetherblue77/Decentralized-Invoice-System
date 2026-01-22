@@ -1,6 +1,7 @@
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers"
 import { expect } from "chai"
 import { ethers } from "hardhat"
+import { MockUSDC__factory } from "../typechain-types"
 
 describe("Invoice System", function () {
     // --- SETUP FIXTURE (DEPLOY CONTRACT) ---
@@ -29,7 +30,7 @@ describe("Invoice System", function () {
 
     describe("createInvoice", function () {
         it("Should create invoice successfully", async function () {
-            const { invoiceSystem, seller, mockUSDC } =
+            const { invoiceSystem, seller, client, mockUSDC } =
                 await loadFixture(deployInvoiceFixture)
             const amount = ethers.parseUnits("100", 18)
 
@@ -37,27 +38,40 @@ describe("Invoice System", function () {
                 invoiceSystem
                     .connect(seller)
                     .createInvoice(
-                        await mockUSDC.getAddress(),
+                        client.address,
                         amount,
+                        await mockUSDC.getAddress(),
                         "Test Invoice",
                     ),
             )
                 .to.emit(invoiceSystem, "InvoiceCreated")
-                .withArgs(1, seller.address, amount, "Test Invoice")
+                .withArgs(
+                    1,
+                    seller.address,
+                    client.address,
+                    amount,
+                    "Test Invoice",
+                )
 
             const invoice = await invoiceSystem.invoices(1)
             expect(invoice.amount).to.equal(amount)
             expect(invoice.seller).to.equal(seller.address)
+            expect(invoice.client).to.equal(client.address)
             expect(invoice.id).to.equal(1)
         })
 
         it("Revert if amount is 0", async function () {
-            const { invoiceSystem, seller, mockUSDC } =
+            const { invoiceSystem, seller, client, mockUSDC } =
                 await loadFixture(deployInvoiceFixture)
             await expect(
                 invoiceSystem
                     .connect(seller)
-                    .createInvoice(await mockUSDC.getAddress(), 0, "Free"),
+                    .createInvoice(
+                        client.address,
+                        0,
+                        await mockUSDC.getAddress(),
+                        "Free",
+                    ),
             ).to.be.revertedWithCustomError(
                 invoiceSystem,
                 "InvoiceSystem__InvalidAmount",
@@ -65,15 +79,38 @@ describe("Invoice System", function () {
         })
 
         it("Revert if token address is ZeroAddress", async function () {
-            const { invoiceSystem, seller } =
+            const { invoiceSystem, seller, client } =
                 await loadFixture(deployInvoiceFixture)
             await expect(
                 invoiceSystem
                     .connect(seller)
-                    .createInvoice(ethers.ZeroAddress, 100, "Error"),
+                    .createInvoice(
+                        client.address,
+                        100,
+                        ethers.ZeroAddress,
+                        "Error",
+                    ),
             ).to.be.revertedWithCustomError(
                 invoiceSystem,
                 "InvoiceSystem__InvalidTokenAddress",
+            )
+        })
+
+        it("Revert if client address is ZeroAddress", async function () {
+            const { invoiceSystem, seller, mockUSDC } =
+                await loadFixture(deployInvoiceFixture)
+            await expect(
+                invoiceSystem
+                    .connect(seller)
+                    .createInvoice(
+                        ethers.ZeroAddress,
+                        100,
+                        await mockUSDC.getAddress(),
+                        "Error",
+                    ),
+            ).to.be.revertedWithCustomError(
+                invoiceSystem,
+                "InvoiceSystem__InvalidClientAddress",
             )
         })
     })
@@ -88,8 +125,9 @@ describe("Invoice System", function () {
             await data.invoiceSystem
                 .connect(data.seller)
                 .createInvoice(
-                    await data.mockUSDC.getAddress(),
+                    data.client.address,
                     amount,
+                    await data.mockUSDC.getAddress(),
                     "Design",
                 )
 
@@ -178,6 +216,37 @@ describe("Invoice System", function () {
             expect(await mockUSDC.balanceOf(client.address)).to.equal(0)
             await expect(invoiceSystem.connect(client).payInvoice(1)).to.be
                 .reverted
+        })
+    })
+
+    describe("getAllInvoices", function () {
+        it("Should return empty array if no invoces created", async function () {
+            const {invoiceSystem} = await loadFixture(deployInvoiceFixture)
+            const allInvoices = await invoiceSystem.getAllInvoices()
+            expect(allInvoices.length).to.equal(0)
+        })
+
+        it("Should return all created invoices with correct IDs and data", async function () {
+            const {invoiceSystem, seller, client, mockUSDC} = await loadFixture(deployInvoiceFixture)
+            const amount =  ethers.parseUnits("100", 18)
+            const tokenAddress = await mockUSDC.getAddress()
+
+            await invoiceSystem.connect(seller).createInvoice(client.address, amount, tokenAddress, "First Invoice")
+            await invoiceSystem.connect(seller).createInvoice(client.address, amount, tokenAddress, "Second Invoice")
+            await invoiceSystem.connect(seller).createInvoice(client.address, amount, tokenAddress, "Third Invoice")
+
+            const allInvoices = await invoiceSystem.getAllInvoices()
+            expect(allInvoices.length).to.equal(3)
+
+            expect(allInvoices[0].id).to.equal(1)
+            expect(allInvoices[0].description).to.equal("First Invoice");
+            expect(allInvoices[0].client).to.equal(client.address);
+
+            expect(allInvoices[1].id).to.equal(2)
+            expect(allInvoices[1].description).to.equal("Second Invoice");
+
+            expect(allInvoices[2].id).to.equal(3)
+            expect(allInvoices[2].description).to.equal("Third Invoice");
         })
     })
 })
