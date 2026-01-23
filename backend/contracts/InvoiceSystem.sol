@@ -21,6 +21,7 @@ contract InvoiceSystem is ReentrancyGuard {
         address client;
         address tokenAddress;
         uint256 amount;
+        uint256 dueDate;
         string description;
         bool isPaid;
     }
@@ -32,6 +33,7 @@ contract InvoiceSystem is ReentrancyGuard {
         address indexed seller,
         address indexed client,
         uint256 amount,
+        uint256 dueDate,
         string description
     );
     event InvoicePaid(uint256 indexed id, address indexed client);
@@ -41,8 +43,9 @@ contract InvoiceSystem is ReentrancyGuard {
         address _client,
         uint256 _amount,
         address _tokenAddress,
+        uint256 _dueDate,
         string memory _description
-    ) external {
+    ) public {
         if (_amount == 0) {
             revert InvoiceSystem__InvalidAmount();
         }
@@ -63,6 +66,7 @@ contract InvoiceSystem is ReentrancyGuard {
             client: _client,
             tokenAddress: _tokenAddress,
             amount: _amount,
+            dueDate: _dueDate,
             description: _description,
             isPaid: false
         });
@@ -72,6 +76,7 @@ contract InvoiceSystem is ReentrancyGuard {
             msg.sender,
             _client,
             _amount,
+            _dueDate,
             _description
         );
     }
