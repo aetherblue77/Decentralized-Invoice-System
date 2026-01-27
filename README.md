@@ -11,7 +11,7 @@ This repository is divided into two main parts. Here is the current progress:
 | Module | Status | Description |
 | :--- | :--- | :--- |
 | **Backend** | ✅ **COMPLETED** | Smart Contracts created, tested (100% coverage), and deployed to **Sepolia Testnet**. |
-| **Frontend** | 🔄 **ONGOING** | Currently building the User Interface (Next.js) to interact with the system. |
+| **Frontend** | ✅ **COMPLETED** | Fully functional User Interface built with **Next.js** to interact with the Smart Contracts. |
 
 ---
 
@@ -52,16 +52,24 @@ Instead of using a traditional bank (which involves IDR to USD conversion fees a
 This project is organized as a monorepo. Click on the folder names below to explore the code:
 
 * **[`/backend`](./backend)**: Contains the Hardhat environment, Solidity Smart Contracts (`InvoiceSystem.sol`), Deployment Scripts, and Unit Tests.
-* **[`/frontend`](./frontend)**: *(Coming Soon)* Contains the Next.js application for the user interface.
+* **[`/frontend`](./frontend)**: Contains the Next.js application, UI Components, and Web3 Integration logic.
 
 ---
 
-## 🛠️ Tech Stack (Backend Phase)
+## 🛠️ Tech Stack
 
+### Backend (Smart Contracts)
 * **Language:** Solidity & TypeScript
 * **Framework:** Hardhat
+* **Testing:** Mocha & Chai
 * **Network:** Sepolia Testnet (Ethereum)
 * **Token Standard:** ERC-20 (Using a custom Mock USDC for testing purposes)
+
+### Frontend (User Interface)
+* **Framework:** Next.js (React) & TypeScript
+* **Styling:** Tailwind CSS & shadcn/ui
+* **Web3 Integration:** Wagmi, Viem, & RainbowKit
+* **UX Features:** Optimistic UI Updates, Skeleton Loading, Toast Notifications
 
 ---
 
@@ -75,6 +83,6 @@ This project is organized as a monorepo. Click on the folder names below to expl
 
 ## 🤝 Feedback
 
-I am building this project in public to learn and improve. Since the **Backend** is currently finished, I welcome any feedback regarding the Smart Contract logic or security.
+I am building this project in public to learn and improve. I welcome any feedback regarding the Smart Contract logic, UI/UX flow, or security best practices.
 
-Feel free to explore the `/backend` folder to see the code!
+Feel free to explore the code and open an issue if you find any bugs!
