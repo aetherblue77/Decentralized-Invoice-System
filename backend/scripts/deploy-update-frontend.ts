@@ -1,6 +1,9 @@
 import {ethers, network, artifacts} from "hardhat"
 import * as fs from "fs"
 import * as path from "path"
+import { verify } from "../utils/verify"
+import { developmentChains, networkConfig } from "../helper-hardhat-config"
+
 
 const FRONTEND_CONSTANT_DIR = path.resolve(__dirname, "../../frontend/constants")
 const FRONTEND_ADDRESS_FILE = path.join(FRONTEND_CONSTANT_DIR, "contractAddresses.json")
@@ -27,6 +30,14 @@ async function main() {
     const mockUSDCAddress = await mockUSDC.getAddress()
     console.log("✅ MockUSDC deployed at:", mockUSDCAddress)
 
+    // VERIFY MOCK USDC CONTRACT
+    if (!developmentChains.includes(network.name) && process.env.ETHERSCAN_API_KEY) {
+        console.log("⏳ Waiting for 6 block confirmations for MockUSDC...")
+        await mockUSDC.deploymentTransaction()?.wait(6)
+        console.log("Verifying MockUSDC...")
+        await verify(mockUSDCAddress, [])
+    }
+
     // =========================================
     // 2. DEPLOY INVOICE SYSTEM
     // =========================================
@@ -37,6 +48,14 @@ async function main() {
 
     const invoiceSystemAddress = await InvoiceSystem.getAddress()
     console.log("✅ InvoiceSystem deployed at:", invoiceSystemAddress)
+
+    // VERIFY INVOICE SYSTEM CONTRACT
+    if (!developmentChains.includes(network.name) && process.env.ETHERSCAN_API_KEY) {
+        console.log("⏳ Waiting for 6 block confirmations for InvoiceSystem...")
+        await InvoiceSystem.deploymentTransaction()?.wait(6)
+        console.log("Verifying InvoiceSystem...")
+        await verify(invoiceSystemAddress, [])
+    }
 
     // =========================================
     // 3. UPDATE FRONTEND
