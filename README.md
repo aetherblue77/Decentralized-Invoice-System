@@ -2,6 +2,8 @@
 
 > **A blockchain-based invoicing solution designed to simplify cross-border payments for freelancers and clients worldwide.**
 
+🚀 Try it Live You can test the application directly on the Sepolia Testnet (Make sure to grab some Free MockUSDC from the faucet button!): 👉 [Live Demo](https://decentralized-invoice-system.vercel.app/)
+
 ---
 
 ## 🚧 Project Status: Active Development
