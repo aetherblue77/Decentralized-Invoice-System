@@ -61,8 +61,8 @@ The frontend interacts with these verified Smart Contracts:
 
 | Contract | Address |
 | :--- | :--- |
-| **InvoiceSystem** | `[INVOICE SYSTEM CONTRACT]`(https://sepolia.etherscan.io/address/0x04a588cEcDF3538398d75709ec75E74308015F62) |
-| **MockUSDC** | `[MOCK USDC CONTRACT]`(https://sepolia.etherscan.io/address/0x88fA08751036FcBB3d093cb93a006B3C0564A134) |
+| **InvoiceSystem** | [INVOICE SYSTEM CONTRACT](https://sepolia.etherscan.io/address/0x04a588cEcDF3538398d75709ec75E74308015F62) |
+| **MockUSDC** | [MOCK USDC CONTRACT](https://sepolia.etherscan.io/address/0x88fA08751036FcBB3d093cb93a006B3C0564A134) |
 
 ---
 
